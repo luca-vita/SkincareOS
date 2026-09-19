@@ -351,8 +351,7 @@ def get_timeline(conn: sqlite3.Connection) -> List[TimelineItem]:
     pm_ids = [s["id"] for s in steps.get("pm", [])]
 
     logs_query = """
-    SELECT entry_date, am_cleanser, am_azid, am_rederma, am_spf,
-           pm_cleanser, pm_differin, pm_rederma, stinging_index
+    SELECT *
     FROM daily_logs
     ORDER BY entry_date ASC
     """
@@ -361,10 +360,11 @@ def get_timeline(conn: sqlite3.Connection) -> List[TimelineItem]:
     
     logs_map = {}
     for log in logs:
+        keys = set(log.keys())
         am_n = max(1, len(am_ids))
         pm_n = max(1, len(pm_ids))
-        am_score = sum(1 for sid in am_ids if log[sid]) / am_n
-        pm_score = sum(1 for sid in pm_ids if log[sid]) / pm_n
+        am_score = sum(1 for sid in am_ids if sid in keys and log[sid]) / am_n
+        pm_score = sum(1 for sid in pm_ids if sid in keys and log[sid]) / pm_n
         
         logs_map[date.fromisoformat(log["entry_date"])] = {
             "am_score": am_score,
