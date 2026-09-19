@@ -151,6 +151,7 @@ def test_upload_photo_success_and_timeline_hydration(monkeypatch, tmp_path):
     os.makedirs(test_photos_dir, exist_ok=True)
     monkeypatch.setattr("app.config.PHOTOS_DIR", test_photos_dir)
     monkeypatch.setattr("app.services.photo_analysis.PHOTOS_DIR", test_photos_dir)
+    monkeypatch.setattr("app.cv_pipeline.PHOTOS_DIR", test_photos_dir)
     
     # Mock del pipeline di successo
     dummy_warped = np.zeros((2048, 2048, 3), dtype=np.uint8)
@@ -277,20 +278,23 @@ def test_upload_photo_success_and_timeline_hydration(monkeypatch, tmp_path):
 
 def test_therapeutic_pressure_metrics():
     """Verifica il calcolo della pressione terapeutica su finestra mobile di 14 giorni."""
-    # Con 0 log nel DB, l'endpoint restituisce indici a 0.0% senza sollevare errori di divisione per zero
+    from app.routine_config import get_compliance_axes, reload_routine_config
+
+    reload_routine_config()
+    expected_axes = {a["id"]: a for a in get_compliance_axes()}
+
     response = client.get("/api/v1/metrics/therapeutic-pressure?target_date=2026-09-09")
     assert response.status_code == 200
     data = response.json()
     assert data["days_recorded"] == 0
     assert data["window_days"] == 14
     axes = {a["id"]: a for a in data["axes"]}
-    assert set(axes) >= {"adapalene", "azelaic", "rederma"}
+    assert set(axes.keys()) == set(expected_axes.keys())
     for axis in axes.values():
         assert axis["current_pct"] == 0.0
         assert axis["completed_slots"] == 0
         assert axis["is_compliant"] is False
 
-    # Inseriamo un log con aderenza totale per la data target
     payload = {
         "entry_date": "2026-09-09",
         "am_cleanser": True,
@@ -302,20 +306,19 @@ def test_therapeutic_pressure_metrics():
         "pm_rederma": True,
         "stinging_index": 0,
         "gym_workout": "NONE",
-        "notes": "Test"
+        "notes": "Test",
     }
     response = client.post("/api/v1/logs", json=payload)
     assert response.status_code == 200
 
-    # Ora verifichiamo che le metriche riflettano questo log (1 giorno su 14 = 7.1%, 2/28 = 7.1% per rederma)
     response = client.get("/api/v1/metrics/therapeutic-pressure?target_date=2026-09-09")
     assert response.status_code == 200
     data = response.json()
     assert data["days_recorded"] == 1
     axes = {a["id"]: a for a in data["axes"]}
-    assert axes["adapalene"]["completed_slots"] == 1
-    assert axes["adapalene"]["current_pct"] == round((1 / 14.0) * 100, 1)
-    assert axes["azelaic"]["completed_slots"] == 1
-    assert axes["azelaic"]["current_pct"] == round((1 / 14.0) * 100, 1)
-    assert axes["rederma"]["completed_slots"] == 2  # am_rederma + pm_rederma
-    assert axes["rederma"]["current_pct"] == round((2 / 28.0) * 100, 1)
+    for active_id, cfg in expected_axes.items():
+        flags = cfg["slot_flags"]
+        completed = sum(1 for f in flags if payload.get(f))
+        total = cfg["total_slots"]
+        assert axes[active_id]["completed_slots"] == completed
+        assert axes[active_id]["current_pct"] == round((completed / total) * 100, 1)

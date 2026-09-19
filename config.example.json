@@ -1,44 +1,44 @@
 {
-  "_comment": "Copia questo file come data/routine.json e personalizza. Gli id degli step = colonne di daily_logs. I colori UI restano nel codice, non qui.",
+  "_comment": "Template pubblico. Copia in data/routine.json e personalizza. Gli id devono coincidere con le colonne di daily_logs. initial_p di default è 0 (niente regime pre-caricato).",
   "routine": {
     "am": [
-      { "id": "am_cleanser", "label": "Detergente", "desc": "Cleanser" },
-      { "id": "am_active_a", "label": "Attivo A (es. azelaico)", "desc": null },
-      { "id": "am_active_b", "label": "Attivo B (es. niacinamide AM)", "desc": null },
+      { "id": "am_cleanser", "label": "Detergente AM", "desc": "Cleanser" },
+      { "id": "am_azid", "label": "Attivo AM 1", "desc": null },
+      { "id": "am_rederma", "label": "Attivo AM 2", "desc": null },
       { "id": "am_spf", "label": "Protezione solare", "desc": "SPF" }
     ],
     "pm": [
-      { "id": "pm_cleanser", "label": "Detergente", "desc": "Cleanser" },
-      { "id": "pm_active_c", "label": "Attivo C (es. retinoid)", "desc": null },
-      { "id": "pm_active_b", "label": "Attivo B (es. niacinamide PM)", "desc": null }
+      { "id": "pm_cleanser", "label": "Detergente PM", "desc": "Cleanser" },
+      { "id": "pm_differin", "label": "Attivo PM 1", "desc": null },
+      { "id": "pm_rederma", "label": "Attivo PM 2", "desc": null }
     ]
   },
   "actives": {
-    "active_c": {
-      "label": "Attivo C",
+    "active_pm1": {
+      "label": "Attivo PM 1",
       "alpha": 0.12,
       "target": 1.0,
-      "initial_p": 1.0,
-      "dose_col": "active_c_doses",
-      "log_flags": ["pm_active_c"],
-      "compliance_target_pct": 78.6
+      "initial_p": 0.0,
+      "dose_col": "active_pm1_doses",
+      "log_flags": ["pm_differin"],
+      "compliance_target_pct": 80.0
     },
-    "active_a": {
-      "label": "Attivo A",
+    "active_am1": {
+      "label": "Attivo AM 1",
       "alpha": 0.20,
       "target": 1.0,
       "initial_p": 0.0,
-      "dose_col": "active_a_doses",
-      "log_flags": ["am_active_a"],
-      "compliance_target_pct": 85.7
+      "dose_col": "active_am1_doses",
+      "log_flags": ["am_azid"],
+      "compliance_target_pct": 80.0
     },
-    "active_b": {
-      "label": "Attivo B",
+    "active_am_pm2": {
+      "label": "Attivo AM/PM 2",
       "alpha": 0.35,
       "target": 2.0,
-      "initial_p": 0.5,
-      "dose_col": "active_b_doses",
-      "log_flags": ["am_active_b", "pm_active_b"],
+      "initial_p": 0.0,
+      "dose_col": "active_am_pm2_doses",
+      "log_flags": ["am_rederma", "pm_rederma"],
       "compliance_target_pct": 80.0
     }
   },

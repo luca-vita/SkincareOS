@@ -45,25 +45,35 @@ Prodotti, attivi EMA, bande di saturazione, lag e target di aderenza **non** son
 ```bash
 mkdir -p data
 cp config.example.json data/routine.json
-# modifica data/routine.json con i tuoi prodotti / α / target
+# modifica data/routine.json con i tuoi prodotti / α / target / initial_p
 ```
 
-- `config.example.json` — template condivisibile (nel repo)
+- `config.example.json` — template **anonimo** (nel repo; niente marche né regime personale)
 - `data/routine.json` — config personale (cartella `data/` gitignored)
+- `initial_p` — saturazione di partenza dell’EMA; **default 0** se omesso; metti 1.0 / 0.5 solo se vuoi simulare un regime già avviato
 - Path override: env `ROUTINE_CONFIG_PATH`
 
 Gli `id` degli step in `routine.am` / `routine.pm` devono coincidere con le colonne booleane di `daily_logs` (es. `am_azid`, `pm_differin`).
 
-Se `data/routine.json` manca, l’app usa `config.example.json` come fallback.
+Se `data/routine.json` manca, l’app usa `config.example.json` come fallback (etichette generiche, `initial_p: 0`).
 
-### 5. Database
+### 5. Database (indipendente dalla routine)
 
 Non serve creare il DB a mano. Al primo `uvicorn`, `init_db()`:
 1. crea `data/` se non esiste
 2. apre/crea `data/app.db`
 3. applica `app/schema.sql` (`CREATE TABLE IF NOT EXISTS …`)
 
-Uno clone fresco parte con DB vuoto ma schema già pronto. Log, foto e metriche si popolano dall’uso. Le foto allineate finiscono in `data/photos/` (anch’essa sotto `data/`, quindi non in git).
+Uno clone fresco parte con DB **vuoto** ma schema pronto.
+
+**Importante:** cambiare o usare `config.example.json` **non** cancella log/foto. Calendario, emoji palestra/foto e checkpoint vivono in `data/app.db` (+ `data/photos/`). Per ripartire da zero:
+
+```bash
+rm -f data/app.db data/app.db-*
+# opzionale: rm -rf data/photos/*
+```
+
+Poi riavvia uvicorn: lo schema viene ricreato vuoto.
 
 ---
 

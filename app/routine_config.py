@@ -64,6 +64,11 @@ def _validate(cfg: dict[str, Any]) -> None:
         for req in ("alpha", "target", "dose_col", "label", "log_flags"):
             if req not in active:
                 raise ValueError(f"Config active '{active_id}': manca '{req}'")
+        # initial_p: default 0 se assente (niente “già a regime” implicito)
+        if "initial_p" not in active:
+            active["initial_p"] = 0.0
+        else:
+            active["initial_p"] = float(active["initial_p"])
         if not isinstance(active["log_flags"], list) or not active["log_flags"]:
             raise ValueError(
                 f"Config active '{active_id}': log_flags deve essere una lista non vuota"

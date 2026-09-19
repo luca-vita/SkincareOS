@@ -629,7 +629,7 @@ def plot_results_metrics(
     sat_in = (
         df_saturation
         if df_saturation is not None
-        else pd.DataFrame(columns=["S_adapalene", "S_azelaic", "S_rederma"])
+        else pd.DataFrame(columns=[f"S_{a}" for a in _actives()])
     )
     start, end, _sat, cp = _resolve_plot_window(
         sat_in, df_checkpoints, highlight_date, window_days
@@ -808,7 +808,11 @@ def plot_correlation_matrix(
         "Δ Levigatezza",
         "Δ Gravità segni",
     ]
-    rows = list(matrix.index) if not matrix.empty else ["Adapalene", "Azelaico", "Rederma"]
+    rows = (
+        list(matrix.index)
+        if not matrix.empty
+        else [cfg["label"] for cfg in _actives().values()]
+    )
     ax.set_xticks(range(len(cols)))
     ax.set_xticklabels(cols, rotation=25, ha="right", color=UI_MUTED)
     ax.set_yticks(range(len(rows)))
