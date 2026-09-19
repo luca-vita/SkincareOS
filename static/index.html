@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkinCare OS</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <!-- Importazione Google Fonts per un look super girly, fun, whimsical e leggermente corsivo/bubbly -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=DynaPuff:wght@400..700&family=Pacifico&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css?v=1.3.7">
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-container">
+            <h1>Skincare<span class="accent">OS</span></h1>
+            <p class="subtitle">Skincare Engine & Biometric Timeline Tracker</p>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <!-- SEZIONE DI SINISTRA: INPUT (LOG giornaliero e UPLOAD settimanale) -->
+        <section class="input-section">
+            <!-- SCHEDA LOG GIORNALIERO -->
+            <div class="card form-card">
+                <h2 id="log-form-title">Registra Log Giornaliero</h2>
+                <form id="log-form">
+                    <div class="form-group">
+                        <label for="log-date">Data</label>
+                        <input type="date" id="log-date" required>
+                    </div>
+
+                    <div class="routine-section-title">AM Routine</div>
+                    <div id="am-routine-steps" class="routine-steps"></div>
+
+                    <div class="routine-section-title">PM Routine</div>
+                    <div id="pm-routine-steps" class="routine-steps"></div>
+
+                    <div class="form-group" style="margin-top: 1.5rem;">
+                        <label for="stinging-index">Indice di Bruciore (Stinging Index)</label>
+                        <select id="stinging-index" required>
+                            <option value="0">0 - Nessuno (None)</option>
+                            <option value="1">1 - Lieve Transitorio (Mild Transient)</option>
+                            <option value="2">2 - Barriera Compromessa (Sustained Barrier Warning)</option>
+                            <option value="3">3 - Dermatite Reattiva Grave (Severe Reactive Dermatitis)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gym-workout">Allenamento in Palestra (Gym Workout)</label>
+                        <select id="gym-workout" required>
+                            <option value="NONE">Nessuno (NONE)</option>
+                            <option value="MORNING">Mattina (MORNING)</option>
+                            <option value="AFTERNOON">Pomeriggio (AFTERNOON)</option>
+                            <option value="EVENING">Sera (EVENING)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="log-notes">Note Cliniche (max 500 caratteri)</label>
+                        <textarea id="log-notes" maxlength="500" placeholder="Inserisci eventuali osservazioni, sintomi o reazioni cutanee..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submit-log-btn">Invia Log</button>
+                </form>
+                <div id="log-message" class="message"></div>
+            </div>
+
+            <!-- SCHEDA CARICAMENTO FOTO -->
+            <div class="card form-card">
+                <h2>Carica Checkpoint Fotografico</h2>
+                <form id="upload-form" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="upload-date">Data Foto</label>
+                        <input type="date" id="upload-date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="photo-file" class="file-drop-area">
+                            <span class="file-btn">Seleziona Foto</span>
+                            <span class="file-info" id="file-info-text">Nessun file selezionato (JPEG, PNG, HEIC)</span>
+                            <input type="file" id="photo-file" accept="image/*" required style="display: none;">
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-secondary" id="submit-upload-btn">Carica e Allinea Foto</button>
+                    <!-- Pulsante Elimina Foto (mostrato dinamicamente se presente) -->
+                    <button type="button" class="btn btn-danger" id="delete-photo-btn" style="display: none; margin-top: 0.75rem;">Elimina Foto Esistente</button>
+                </form>
+                <div id="upload-message" class="message"></div>
+            </div>
+        </section>
+
+        <!-- SEZIONE DI DESTRA: DASHBOARD CON SCHEDE (TIMELINE, CALENDARIO, GRAFICI) -->
+        <section class="timeline-section">
+            <!-- Schede di Navigazione Dashboard -->
+            <div class="tabs-container">
+                <button class="tab-btn active" data-tab="calendar-tab">Calendario Storico</button>
+                <button class="tab-btn" data-tab="charts-tab">Dashboard Clinica</button>
+                <button class="tab-btn" data-tab="timeline-tab">Timeline Foto</button>
+            </div>
+
+            <!-- PANNELLO 1: CALENDARIO STORICO -->
+            <div id="calendar-tab" class="tab-content active">
+                <div class="card calendar-card">
+                    <div class="calendar-header-nav">
+                        <button class="btn-nav" id="prev-month-btn">&larr;</button>
+                        <h2 id="calendar-title" style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Settembre 2026</h2>
+                        <button class="btn-nav" id="next-month-btn">&rarr;</button>
+                    </div>
+                    
+                    <p class="calendar-instructions">Clicca su un giorno per visualizzare, compilare o modificare il log giornaliero nel form di sinistra.</p>
+                    
+                    <!-- Griglia del Calendario -->
+                    <div class="calendar-grid-container">
+                        <div class="calendar-weekdays">
+                            <div>Lun</div><div>Mar</div><div>Mer</div><div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div>
+                        </div>
+                        <div class="calendar-days" id="calendar-days-grid">
+                            <!-- Popolato dinamicamente da JS -->
+                        </div>
+                    </div>
+
+                    <!-- Legenda Calendario -->
+                    <div class="calendar-legend">
+                        <div class="legend-item">
+                            <span class="legend-color compliance-full"></span>
+                            <span>Routine 100%</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color compliance-partial"></span>
+                            <span>Routine Parziale</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color compliance-none"></span>
+                            <span>Nessuna Routine</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot stinging-0"></span>
+                            <span>Bruciore 0 (Nessuno)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot stinging-1"></span>
+                            <span>Bruciore 1 (Lieve)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot stinging-2"></span>
+                            <span>Bruciore 2 (Medio)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot stinging-3"></span>
+                            <span>Bruciore 3 (Grave)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span>🏋️</span>
+                            <span>Palestra</span>
+                        </div>
+                        <div class="legend-item">
+                            <span>📷</span>
+                            <span>Foto</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANNELLO 2: DASHBOARD CLINICA -->
+            <div id="charts-tab" class="tab-content">
+                <div class="card charts-card">
+                    <h2>Dashboard clinica</h2>
+
+                    <section class="clinical-section" id="clinical-habits-section">
+                        <header class="clinical-section-header">
+                            <h3>Abitudini</h3>
+                            <p class="clinical-habits-blurb">
+                                Stimando l'occupazione recettoriale o enzimatica nei tessuti, il colore segnala se la pelle mantiene la copertura terapeutica costante o scende sotto le soglie critiche necessarie per sostenere turnover follicolare, inibizione della melanina e sintesi lipidica di barriera.
+                            </p>
+                        </header>
+                        <div class="clinical-window-control">
+                            <label for="clinical-window-days">Finestra (giorni)</label>
+                            <input type="number" id="clinical-window-days" min="3" max="90" value="30" step="1">
+                        </div>
+                        <div class="clinical-band-legend" aria-hidden="true">
+                            <span class="band-swatch band-opt"></span><span>Ottimale</span>
+                            <span class="band-swatch band-sub"></span><span>Sub-ottimale</span>
+                            <span class="band-swatch band-crit"></span><span>Critica</span>
+                        </div>
+                        <div id="clinical-sat-cards" class="clinical-sat-grid"></div>
+                    </section>
+
+                    <section class="clinical-section" id="clinical-results-section">
+                        <header class="clinical-section-header">
+                            <h3>Risultati</h3>
+                        </header>
+                        <div class="clinical-results-toolbar">
+                            <div class="clinical-window-control">
+                                <label for="clinical-results-window-days">Finestra (giorni)</label>
+                                <input type="number" id="clinical-results-window-days" min="3" max="90" value="20" step="1">
+                            </div>
+                            <div class="clinical-results-pager">
+                                <button type="button" id="results-page-prev" class="clinical-page-btn" aria-label="Pagina precedente" title="Pagina precedente">‹</button>
+                                <p id="results-page-indicator" class="clinical-page-indicator">1 / 2</p>
+                                <button type="button" id="results-page-next" class="clinical-page-btn" aria-label="Pagina successiva" title="Pagina successiva">›</button>
+                            </div>
+                        </div>
+                        <div class="clinical-results-viewer">
+                            <div class="clinical-plot-frame clinical-results-frame">
+                                <img id="clinical-results-img" alt="Andamenti metriche cliniche" style="display:none; width:100%; height:auto;">
+                                <p id="clinical-results-empty" class="clinical-empty-msg">Caricamento risultati…</p>
+                            </div>
+                        </div>
+                        <div class="clinical-corr-block">
+                            <h4>Correlazione dose–risposta</h4>
+                            <p class="clinical-habits-blurb">
+                                Correlazione tra la saturazione degli attivi nei tessuti e la variazione cutanea, calcolata sulle specifiche latenze biologiche. Evidenzia quali molecole stanno guidando i risultati.
+                            </p>
+                            <div class="clinical-plot-frame clinical-corr-frame">
+                                <img id="clinical-correlation-img" alt="Matrice di correlazione" style="display:none; width:100%; height:auto;">
+                                <p id="clinical-correlation-empty" class="clinical-empty-msg" style="display:none;"></p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- PANNELLO 3: TIMELINE FOTO -->
+            <div id="timeline-tab" class="tab-content">
+                <div class="card timeline-card">
+                    <div class="timeline-header-container">
+                        <h2>Timeline Biometrica</h2>
+                        <div class="crossfade-toggle-container">
+                            <div class="overlay-mode-group" role="group" aria-label="Modalità overlay">
+                                <button type="button" class="overlay-mode-btn active" data-mode="off">Off</button>
+                                <button type="button" class="overlay-mode-btn" data-mode="pih">PIH</button>
+                                <button type="button" class="overlay-mode-btn" data-mode="texture">Texture</button>
+                            </div>
+                            <label class="switch-label">
+                                <input type="checkbox" id="crossfade-toggle" checked>
+                                <span class="switch-slider"></span>
+                                <span class="switch-text">Crossfade</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Viewport Immagine Normalizzata -->
+                    <div class="viewport-container">
+                        <div class="viewport-placeholder" id="viewport-placeholder">
+                            <p>Nessun checkpoint fotografico presente nella timeline.</p>
+                            <p class="sub-placeholder">Carica la tua prima foto per iniziare il tracciamento biometrico.</p>
+                        </div>
+                        <img id="timeline-image-back" class="viewport-image" style="display: none;" alt="Checkpoint Precedente">
+                        <img id="timeline-image" class="viewport-image" style="display: none;" alt="Checkpoint Biometrico Normalizzato">
+                        <div class="viewport-overlay" id="viewport-overlay">
+                            <div class="eye-marker left-eye" style="left: 50%; top: 35%; transform: translate(-307.2px, -50%);"></div>
+                            <div class="eye-marker right-eye" style="left: 50%; top: 35%; transform: translate(307.2px, -50%);"></div>
+                        </div>
+                    </div>
+
+                    <!-- Slider della Timeline Discrete -->
+                    <div class="slider-container">
+                        <input type="range" id="timeline-slider" min="0" max="0" value="0" step="1" disabled>
+                        <div class="slider-labels">
+                            <span id="slider-start-date">-</span>
+                            <span id="slider-current-info">Timeline non inizializzata</span>
+                            <span id="slider-end-date">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Metriche analisi del checkpoint corrente (visibile in PIH / Texture) -->
+                    <div class="clinical-data-card checkpoint-analysis-card" id="checkpoint-analysis-card" style="display: none;">
+                        <div class="clinical-header">
+                            <div class="clinical-date-badge">
+                                <span class="label" id="checkpoint-analysis-kicker">ANALISI</span>
+                                <span class="value" id="checkpoint-analysis-title">—</span>
+                            </div>
+                            <div class="clinical-days-badge">
+                                <span class="value" id="checkpoint-analysis-date">-</span>
+                                <span class="label">checkpoint</span>
+                            </div>
+                        </div>
+                        <div class="clinical-grid" id="checkpoint-analysis-grid">
+                            <!-- Popolato da app.js in base a Off/PIH/Texture -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer">
+        <p>&copy; 2026 SkinCare OS. Motore di tracking clinico locale e privacy-first.</p>
+    </footer>
+
+    <script src="/static/app.js?v=2.3.5"></script>
+</body>
+</html>
