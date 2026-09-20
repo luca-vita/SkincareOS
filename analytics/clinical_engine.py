@@ -781,11 +781,41 @@ def plot_clinical_dashboard(
     return fig_res
 
 
+def clinical_benefit_matrix(spearman: pd.DataFrame) -> pd.DataFrame:
+    """
+    Allinea il segno di ρ al miglioramento clinico atteso.
+
+    Spearman grezza: corr(esposizione, Δ).
+      - Infiammazione / segni: miglioramento ⇒ Δ↓ ⇒ ρ attesa < 0
+      - Levigatezza: miglioramento ⇒ Δ↑ ⇒ ρ attesa > 0
+
+    Qui riportiamo tutto su una scala unica:
+      +1 = esposizione associata a miglioramento
+      -1 = esposizione associata a peggioramento
+    invertendo il segno solo per le colonne dove il Δ “buono” è negativo.
+    """
+    if spearman is None or spearman.empty:
+        return spearman
+    out = spearman.copy().astype(float)
+    # Indici colonna: 0 active, 1 smoothness, 2 marks (ordine in compute_spearman_matrix)
+    flip_cols = []
+    for col in out.columns:
+        label = str(col).lower()
+        if "levigatezza" in label or "smooth" in label:
+            continue  # Δ↑ = meglio → ρ già nel verso giusto
+        # infiammazione / segni / marks / active
+        flip_cols.append(col)
+    for col in flip_cols:
+        out[col] = -out[col]
+    return out
+
+
 def plot_correlation_matrix(
     df_deltas: pd.DataFrame,
     figsize: tuple[float, float] = (7.5, 5.5),
 ) -> plt.Figure:
-    matrix, _n_max = compute_spearman_matrix(df_deltas)
+    spearman, _n_max = compute_spearman_matrix(df_deltas)
+    matrix = clinical_benefit_matrix(spearman)
     fig, ax = plt.subplots(figsize=figsize, constrained_layout=True)
     fig.patch.set_facecolor(UI_BG)
     ax.set_facecolor(UI_BG)
@@ -796,9 +826,10 @@ def plot_correlation_matrix(
     data = matrix.to_numpy(dtype=float) if not matrix.empty else np.full((3, 3), np.nan)
     from matplotlib.colors import LinearSegmentedColormap
 
+    # +1 (favorevole) → verde; -1 (sfavorevole) → rosso
     cmap = LinearSegmentedColormap.from_list(
-        "skincare_div",
-        [UI_PRIMARY_HOVER, "#EDE9FE", UI_DANGER],
+        "skincare_benefit",
+        [UI_DANGER, "#EDE9FE", UI_PRIMARY_HOVER],
     ).with_extremes(bad="#E8E4F5")
     masked = np.ma.masked_invalid(data)
     im = ax.imshow(masked, cmap=cmap, vmin=-1.0, vmax=1.0, aspect="auto")
@@ -841,8 +872,20 @@ def plot_correlation_matrix(
                 )
 
     cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+    cbar.set_label(
+        "Associazione clinicamente allineata\n"
+        "(+ miglioramento · − peggioramento)",
+        color=UI_MUTED,
+        fontsize=7.5,
+    )
     cbar.ax.tick_params(colors=UI_MUTED, labelsize=8)
     cbar.outline.set_edgecolor(UI_BORDER)
+    ax.set_title(
+        "Spearman esposizione↔Δ, segno allineato al beneficio",
+        fontsize=10,
+        color=UI_TEXT,
+        pad=8,
+    )
     return fig
 
 
