@@ -4,10 +4,10 @@
     --card-bg: #e6e0f8;        /* Sfondo delle schede: Shade di lilla leggermente più scura e satura per dare profondità */
     --text-color: #1e1b4b;     /* Testo principale: Indigo scurissimo per una leggibilità perfetta su sfondo lilla */
     --text-muted: #5c5685;     /* Testo secondario: Grigio lilla morbido */
-    --primary: #3b82f6;        /* Colore primario: Blu Clinico (Routine AM, bottoni principali) */
-    --primary-hover: #1d4ed8;  /* Colore primario hover */
-    --secondary: #00b368;      /* Colore secondario: Verde Rigenerante (Routine PM, successi, compliance) */
-    --secondary-hover: #008f52;/* Colore secondario hover */
+    --secondary: #3b82f6;        /* Colore primario: Blu Clinico (Routine AM, bottoni principali) */
+    --secondary-hover: #1d4ed8;  /* Colore primario hover */
+    --primary: #00b368;      /* Colore secondario: Verde Rigenerante (Routine PM, successi, compliance) */
+    --primary-hover: #008f52;/* Colore secondario hover */
     --accent: #7c3aed;         /* Colore di accento: Viola Intenso (Dettagli speciali, palestra, elementi attivi) */
     --danger: #ef4444;         /* Colore di allerta: Rosso (Bruciore elevato, errori) */
     --warning: #f97316;        /* Colore di avviso: Arancione (Bruciore medio) */
